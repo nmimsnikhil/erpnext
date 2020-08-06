@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "autoname": "naming_series:",
  "creation": "2019-07-11 16:03:13.681045",
  "doctype": "DocType",
@@ -15,6 +16,8 @@
   "column_break_4",
   "parent_warehouse",
   "get_item_locations",
+  "customer_name",
+  "delivery_date",
   "section_break_6",
   "locations",
   "amended_from"
@@ -47,7 +50,6 @@
    "depends_on": "eval:doc.purpose==='Delivery against Sales Order'",
    "fieldname": "customer",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "label": "Customer",
    "options": "Customer"
   },
@@ -108,10 +110,27 @@
    "options": "STO-PICK-.YYYY.-",
    "reqd": 1,
    "set_only_once": 1
+  },
+  {
+   "depends_on": "eval:doc.purpose==='Delivery against Sales Order'",
+   "fieldname": "customer_name",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Customer Name",
+   "options": "Customer",
+   "read_only": 1
+  },
+  {
+   "fieldname": "delivery_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Delivery Date",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2019-08-29 21:10:11.572387",
+ "links": [],
+ "modified": "2020-08-06 06:36:28.313605",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Pick List",

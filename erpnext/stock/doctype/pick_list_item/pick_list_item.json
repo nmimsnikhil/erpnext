@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "creation": "2019-07-11 16:01:22.832885",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -26,7 +27,9 @@
   "sales_order",
   "sales_order_item",
   "material_request",
-  "material_request_item"
+  "material_request_item",
+  "cb_reference",
+  "so_customer"
  ],
  "fields": [
   {
@@ -166,10 +169,22 @@
    "fieldtype": "Data",
    "label": "Material Request Item",
    "read_only": 1
+  },
+  {
+   "fetch_from": "sales_order.customer",
+   "fieldname": "so_customer",
+   "fieldtype": "Data",
+   "label": "SO Customer",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cb_reference",
+   "fieldtype": "Column Break"
   }
  ],
  "istable": 1,
- "modified": "2019-08-29 21:28:39.539007",
+ "links": [],
+ "modified": "2020-08-06 05:18:35.627539",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Pick List Item",

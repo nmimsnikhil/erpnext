@@ -22,10 +22,14 @@ from frappe.utils import cint, floor, flt, today
 
 
 class PickList(Document):
+	def validate(self):
+		self.validate_delivery_date()
+
 	def before_save(self):
 		self.set_item_locations()
 
 	def before_submit(self):
+		self.set_item_locations()
 		for item in self.locations:
 			if not frappe.get_cached_value('Item', item.item_code, 'has_serial_no'):
 				continue
@@ -36,6 +40,14 @@ class PickList(Document):
 				continue
 			frappe.throw(_('For item {0} at row {1}, count of serial numbers does not match with the picked quantity')
 				.format(frappe.bold(item.item_code), frappe.bold(item.idx)))
+	
+	def validate_delivery_date(self):
+		so = frappe.get_doc("Sales Order", self.locations[0].get("sales_order")).as_dict()
+		item = so.get("items")
+		for i in range(len(so.get("items"))-1):
+			if item[i].delivery_date != item[i+1].delivery_date:
+				return
+		self.delivery_date = item[0].delivery_date
 
 	def set_item_locations(self):
 		items = self.aggregate_item_qty()
