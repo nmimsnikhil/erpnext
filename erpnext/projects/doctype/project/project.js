@@ -3,6 +3,10 @@
 frappe.ui.form.on("Project", {
 	setup(frm) {
 		frm.make_methods = {
+			'Task': () => frappe.model.open_mapped_doc({
+				method: 'erpnext.projects.doctype.project.project.create_task',
+				frm: frm
+			}),
 			'Timesheet': () => {
 				open_form(frm, "Timesheet", "Timesheet Detail", "time_logs");
 			},

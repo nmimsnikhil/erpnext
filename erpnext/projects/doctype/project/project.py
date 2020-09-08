@@ -15,6 +15,7 @@ from erpnext.hr.doctype.daily_work_summary.daily_work_summary import get_users_e
 from erpnext.hr.doctype.holiday_list.holiday_list import is_holiday
 from frappe.desk.form.assign_to import add
 from frappe.model.document import Document
+from frappe.model.mapper import get_mapped_doc
 
 class Project(Document):
 	def get_feed(self):
@@ -33,6 +34,13 @@ class Project(Document):
 
 
 	def validate(self):
+		tasks = frappe.get_all("Task", {"project":self.project_name})
+		for task in tasks:
+			if self.expected_start_date:
+				frappe.db.set_value("Task", task.name, "exp_start_date", self.expected_start_date, update_modified=False)
+			if self.expected_end_date:
+				frappe.db.set_value("Task", task.name, "exp_end_date", self.expected_end_date, update_modified=False)
+
 		if not self.is_new():
 			self.copy_from_template()
 		self.send_welcome_email()
@@ -539,3 +547,15 @@ def set_project_status(project, status):
 
 	project.status = status
 	project.save()
+
+@frappe.whitelist()
+def create_task(source_name, target_doc=None):
+	doc = get_mapped_doc("Project", source_name, {
+			"Project": {
+				"doctype": "Task",
+				"field_map": {
+					"expected_start_date": "exp_start_date",
+					"expected_end_date": "exp_end_date"
+				}}
+		}, target_doc)
+	return doc

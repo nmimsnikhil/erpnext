@@ -15,6 +15,14 @@ from frappe.model.mapper import get_mapped_doc
 
 class PlantBatch(Document):
 	def validate(self):
+		if self.project:
+			tasks = frappe.get_all("Task", {"project":self.project})
+			for task in tasks:
+				if self.start_date:
+					frappe.db.set_value("Task", task.name, "exp_start_date", self.start_date, update_modified=False)
+				if self.end_date:
+					frappe.db.set_value("Task", task.name, "exp_end_date", self.end_date, update_modified=False)
+
 		self.set_missing_values()
 
 	def after_insert(self):
