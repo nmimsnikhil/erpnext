@@ -34,18 +34,22 @@ class Project(Document):
 
 
 	def validate(self):
-		tasks = frappe.get_all("Task", {"project":self.project_name})
-		for task in tasks:
-			if self.expected_start_date:
-				frappe.db.set_value("Task", task.name, "exp_start_date", self.expected_start_date, update_modified=False)
-			if self.expected_end_date:
-				frappe.db.set_value("Task", task.name, "exp_end_date", self.expected_end_date, update_modified=False)
-
 		if not self.is_new():
 			self.copy_from_template()
 		self.send_welcome_email()
 		self.update_costing()
 		self.update_percent_complete()
+		self.validate_task()
+
+	def validate_task(self):
+		tasks = frappe.get_all("Task", {"project":self.project_name})
+		for task in tasks:
+			doc = frappe.get_doc("Task", task.name)
+			if self.expected_start_date:
+				doc.exp_start_date = self.expected_start_date
+			if self.expected_end_date:
+				doc.exp_end_date = self.expected_end_date
+			doc.save()
 
 	def copy_from_template(self):
 		'''

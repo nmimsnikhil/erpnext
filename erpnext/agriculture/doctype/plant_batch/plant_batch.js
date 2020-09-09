@@ -46,11 +46,6 @@ frappe.ui.form.on('Plant Batch', {
 				});
 			}, __("Create"));
 		}
-	},
-
-	after_save: (frm) => {
-		if(frm.doc.project)
-			frappe.db.set_value("Project", frm.doc.project, "expected_start_date", frm.doc.start_date);
 	}
 });
 
