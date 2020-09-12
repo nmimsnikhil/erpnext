@@ -39,9 +39,11 @@ class Project(Document):
 		self.send_welcome_email()
 		self.update_costing()
 		self.update_percent_complete()
-		self.validate_task()
 
-	def validate_task(self):
+	def after_insert(self):
+		self.set_task_dates()
+
+	def set_task_dates(self):
 		tasks = frappe.get_all("Task", {"project":self.project_name})
 		for task in tasks:
 			doc = frappe.get_doc("Task", task.name)
@@ -555,11 +557,11 @@ def set_project_status(project, status):
 @frappe.whitelist()
 def create_task(source_name, target_doc=None):
 	doc = get_mapped_doc("Project", source_name, {
-			"Project": {
-				"doctype": "Task",
-				"field_map": {
-					"expected_start_date": "exp_start_date",
-					"expected_end_date": "exp_end_date"
-				}}
-		}, target_doc)
+		"Project": {
+			"doctype": "Task",
+			"field_map": {
+				"expected_start_date": "exp_start_date",
+				"expected_end_date": "exp_end_date"
+			}}
+	}, target_doc)
 	return doc

@@ -15,8 +15,9 @@ from frappe.model.mapper import get_mapped_doc
 
 class PlantBatch(Document):
 	def validate(self):
-		self.validate_project()
-		self.validate_task()
+		periods = frappe.db.get_value("Strain",self.strain,"period")
+		self.set_project_dates(periods)
+		self.set_task_dates(periods)
 		self.set_missing_values()
 
 	def after_insert(self):
@@ -54,22 +55,25 @@ class PlantBatch(Document):
 
 		self.save()
 
-	def validate_project(self):
+	def set_project_dates(self,periods):
 		if self.project:
 			doc = frappe.get_doc("Project", self.project)
 			doc.expected_start_date = self.start_date
-			doc.save
+			doc.expected_end_date = frappe.utils.add_days(doc.expected_start_date, periods)
+			doc.save()
+			self.end_date = doc.expected_end_date
 
-	def validate_task(self):
-		if self.project:
+	def set_task_dates(self,periods):
+		if self.project and (self.start_date or self.end_date):
 			tasks = frappe.get_all("Task", {"project":self.project})
 			for task in tasks:
 				doc = frappe.get_doc("Task", task.name)
 				if self.start_date:
 					doc.exp_start_date = self.start_date
 				if self.end_date:
-					doc.exp_end_date = self.end_date
+					doc.exp_end_date = frappe.utils.add_days(self.start_date, periods)
 				doc.save()
+
 
 def get_coordinates(doc):
 	return ast.literal_eval(doc.location).get('features')[0].get('geometry').get('coordinates')
