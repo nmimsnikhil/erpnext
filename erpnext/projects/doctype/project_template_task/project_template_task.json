@@ -7,8 +7,11 @@
   "subject",
   "start",
   "duration",
+  "column_break_4",
   "task_weight",
   "assigned_user",
+  "parent_task",
+  "section_break_8",
   "description"
  ],
  "fields": [
@@ -49,10 +52,23 @@
    "fieldtype": "Link",
    "label": "Assigned User",
    "options": "User"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "parent_task",
+   "fieldtype": "Int",
+   "label": "Parent Task"
+  },
+  {
+   "fieldname": "section_break_8",
+   "fieldtype": "Section Break"
   }
  ],
  "istable": 1,
- "modified": "2020-09-01 00:55:10.893286",
+ "modified": "2020-09-15 23:27:25.375270",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project Template Task",

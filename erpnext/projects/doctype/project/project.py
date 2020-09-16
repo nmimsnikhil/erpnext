@@ -55,9 +55,18 @@ class Project(Document):
 			if not self.project_type:
 				self.project_type = template.project_type
 
-			# create tasks from template
+			pt_set=set()
 			for task in template.tasks:
+				if task.parent_task:
+					pt_set.add(task.parent_task)
+			pt_list=list(pt_set)
+			task_no={}
+
+			# create Parent Tasks from template tasks list
+			for i in pt_list:
+				task = template.tasks[i-1]
 				task_doc = frappe.get_doc(dict(
+					is_group = True,
 					doctype = 'Task',
 					subject = task.subject,
 					project = self.name,
@@ -74,6 +83,35 @@ class Project(Document):
 						'assign_to' : task.assigned_user,
 					}
 					add(args)
+				task_no.update({i:task_doc.name})
+			# create child and independent Tasks from template tasks list
+			# also assign task their respective parent task
+			for task in template.tasks:
+				if task.idx not in pt_list:
+					task_doc = frappe.get_doc(dict(
+						doctype = 'Task',
+						subject = task.subject,
+						project = self.name,
+						status = 'Open',
+						exp_start_date = add_days(self.expected_start_date, task.start),
+						exp_end_date = add_days(self.expected_start_date, task.start + task.duration),
+						description = task.description,
+						task_weight = task.task_weight
+					)).insert()
+					if task.assigned_user:
+						args = {
+							'doctype': 'Task',
+							'name': task_doc.name,
+							'assign_to' : task.assigned_user,
+						}
+						add(args)
+					task_no.update({task.idx:task_doc.name})
+				# set parent_task to task
+				if task.parent_task:
+					task_id = task_no[task.idx]
+					doc = frappe.get_doc('Task',task_no[task.idx])
+					doc.parent_task = task_no[task.parent_task]
+					doc.save()
 
 	def is_row_updated(self, row, existing_task_data, fields):
 		if self.get("__islocal") or not existing_task_data: return True
