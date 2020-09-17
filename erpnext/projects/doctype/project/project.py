@@ -108,7 +108,6 @@ class Project(Document):
 					task_no.update({task.idx:task_doc.name})
 				# set parent_task to task
 				if task.parent_task:
-					task_id = task_no[task.idx]
 					doc = frappe.get_doc('Task',task_no[task.idx])
 					doc.parent_task = task_no[task.parent_task]
 					doc.save()
