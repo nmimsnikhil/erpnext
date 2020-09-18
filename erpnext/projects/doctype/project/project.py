@@ -8,7 +8,7 @@ from six import iteritems
 import copy
 from email_reply_parser import EmailReplyParser
 from frappe.utils import (flt, getdate, get_url, now,
-	nowtime, get_time, today, get_datetime, add_days)
+	nowtime, get_time, today, get_datetime, add_days, unique)
 from erpnext.controllers.queries import get_filters_cond
 from frappe.desk.reportview import get_match_cond
 from erpnext.hr.doctype.daily_work_summary.daily_work_summary import get_users_email
@@ -55,16 +55,12 @@ class Project(Document):
 			if not self.project_type:
 				self.project_type = template.project_type
 
-			pt_set=set()
-			for task in template.tasks:
-				if task.parent_task:
-					pt_set.add(task.parent_task)
-			pt_list=list(pt_set)
-			task_no={}
+			parent_task_list = unique([task.parent_task for task in template.tasks if task.parent_task])
+			task_no = {}
 
 			# create Parent Tasks from template tasks list
-			for i in pt_list:
-				task = template.tasks[i-1]
+			for task_idx in parent_task_list:
+				task = template.tasks[task_idx-1]
 				task_doc = frappe.get_doc(dict(
 					is_group = True,
 					doctype = 'Task',
@@ -83,11 +79,11 @@ class Project(Document):
 						'assign_to' : task.assigned_user,
 					}
 					add(args)
-				task_no.update({i:task_doc.name})
+				task_no.update({task_idx: task_doc.name})
 			# create child and independent Tasks from template tasks list
 			# also assign task their respective parent task
 			for task in template.tasks:
-				if task.idx not in pt_list:
+				if task.idx not in parent_task_list:
 					task_doc = frappe.get_doc(dict(
 						doctype = 'Task',
 						subject = task.subject,
