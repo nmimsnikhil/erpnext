@@ -5,6 +5,16 @@ frappe.provide("erpnext.item");
 
 frappe.ui.form.on("Item", {
 	setup: function(frm) {
+<<<<<<< HEAD
+=======
+		frm.make_methods = {
+			'Purchase Order': () => {
+				frappe.new_doc("Purchase Order", {
+					supplier: frm.doc.item_defaults ? frm.doc.item_defaults[0].default_supplier : null
+				})
+			}
+		}
+>>>>>>> 696cb8f8d9... fix: fetched data while creating purchase order
 		frm.add_fetch('attribute', 'numeric_values', 'numeric_values');
 		frm.add_fetch('attribute', 'from_range', 'from_range');
 		frm.add_fetch('attribute', 'to_range', 'to_range');
