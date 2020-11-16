@@ -246,6 +246,11 @@ def get_project(doctype, txt, searchfield, start, page_len, filters):
 				'page_len': page_len
 			})
 
+def get_team_members (doctype, txt, searchfield, start, page_len, filters):
+	return frappe.db.sql("""select employee, employee_name from `tabProject Team Members` 
+			where parent = '%(team)s'""" %{
+				"team":filters.get("team")
+				},as_list=1)
 
 @frappe.whitelist()
 def set_multiple_status(names, status):
