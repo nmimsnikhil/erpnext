@@ -7,7 +7,7 @@ import json
 
 import frappe
 from frappe import _, throw
-from frappe.desk.form.assign_to import clear, close_all_assignments
+from frappe.desk.form.assign_to import clear, close_all_assignments, add
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import add_days, cstr, date_diff, get_link_to_form, getdate, today
 from frappe.utils.nestedset import NestedSet
@@ -54,6 +54,16 @@ class Task(NestedSet):
 			dependent_task_list.remove(self.name)
 			dependent_task_string = ','.join(map(str, dependent_task_list))
 			frappe.db.set_value("Task", parent_task, "depends_on_tasks", dependent_task_string)
+
+		#  Creating ToDo for assigned user. 
+		if self.assign_to:
+			for assignee in self.assign_to:
+				args = {
+					'doctype': 'Task',
+					"name": assignee.parent,
+					'assign_to': [assignee.user],
+				}
+				add(args)
 
 	def validate_dates(self):
 		if self.exp_start_date and self.exp_end_date and getdate(self.exp_start_date) > getdate(self.exp_end_date):
@@ -225,11 +235,8 @@ def get_project(doctype, txt, searchfield, start, page_len, filters):
 			})
 
 def get_team_members (doctype, txt, searchfield, start, page_len, filters):
-	return frappe.db.sql("""select employee, employee_name from `tabProject Team Members` 
-			where parent = '%(team)s'""" %{
-				"team":filters.get("team")
-				},as_list=1)
-
+	return frappe.get_all("Project Team Members", {"parent": filters.get("team")}, ["user", "user_name"], as_list=1)
+	
 @frappe.whitelist()
 def set_multiple_status(names, status):
 	names = json.loads(names)
