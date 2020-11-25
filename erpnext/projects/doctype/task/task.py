@@ -56,15 +56,6 @@ class Task(NestedSet):
 			dependent_task_string = ','.join(map(str, dependent_task_list))
 			frappe.db.set_value("Task", parent_task, "depends_on_tasks", dependent_task_string)
 
-		#  Creating ToDo for assigned user. 
-		if self.assign_to:
-			for assignee in self.assign_to:
-				args = {
-					'doctype': 'Task',
-					"name": assignee.parent,
-					'assign_to': [assignee.user],
-				}
-				add(args)
 
 	def validate_dates(self):
 		if self.exp_start_date and self.exp_end_date and getdate(self.exp_start_date) > getdate(self.exp_end_date):
@@ -122,6 +113,7 @@ class Task(NestedSet):
 		self.unassign_todo()
 		self.populate_depends_on()
 		self.notify()
+		self.assign_todo()
 
 	def unassign_todo(self):
 		if self.status == "Completed" and frappe.db.get_single_value("Projects Settings", "remove_assignment_on_task_completion"):
@@ -129,6 +121,17 @@ class Task(NestedSet):
 		if self.status == "Cancelled":
 			clear(self.doctype, self.name)
 
+	def assign_todo(self):
+		# Creating ToDo for assigned user.
+		if self.assign_to:
+			assign_to = [assign_to.user for assign_to in self.assign_to]
+			print(self.as_dict())
+			add({
+				'doctype': self.doctype,
+				"name": self.name,
+				'assign_to': assign_to
+			})
+	
 	def update_total_expense_claim(self):
 		self.total_expense_claim = frappe.db.sql("""select sum(total_sanctioned_amount) from `tabExpense Claim`
 			where project = %s and task = %s and docstatus=1""",(self.project, self.name))[0][0]
