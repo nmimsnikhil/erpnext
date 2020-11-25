@@ -125,7 +125,6 @@ class Task(NestedSet):
 		# Creating ToDo for assigned user.
 		if self.assign_to:
 			assign_to = [assign_to.user for assign_to in self.assign_to]
-			print(self.as_dict())
 			add({
 				'doctype': self.doctype,
 				"name": self.name,
